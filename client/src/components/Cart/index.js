@@ -6,18 +6,17 @@ import { idbPromise } from '../../utils/helpers';
 import CartItem from '../CartItem';
 import Auth from '../../utils/auth';
 //import { useStoreContext } from '../../utils/GlobalState';
-import store from '../../utils/store';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from '../../utils/actions';
 import './style.css';
 
-// redux stuff
-
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
-
-const Cart = ({ state }) => {
+const Cart = () => {
   //const [state, dispatch] = useStoreContext();
+  const dispatch = useDispatch();
+  const state = useSelector((state) => state);
+  
   const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
 
   useEffect(() => {
@@ -31,16 +30,16 @@ const Cart = ({ state }) => {
   useEffect(() => {
     async function getCart() {
       const cart = await idbPromise('cart', 'get');
-      store.dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+      dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
     }
 
     if (!state.cart.length) {
       getCart();
     }
-  }, [state.cart.length]);
+  }, [state.cart.length, dispatch]);
 
   function toggleCart() {
-    store.dispatch({ type: TOGGLE_CART });
+    dispatch({ type: TOGGLE_CART });
   }
 
   function calculateTotal() {
@@ -109,14 +108,4 @@ const Cart = ({ state }) => {
   );
 };
 
-const mapStateToProps = ({ reducer }) => ({
-  state: reducer
-})
-
-// const mapDispatchToProps = {
-
-// }
-
-
-//export default Cart;
-export default connect(mapStateToProps)(Cart);
+export default Cart;
